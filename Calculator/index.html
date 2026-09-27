@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        .con {
+            width: 400px;
+            height: 600px;
+            margin: auto;
+            border: 1px solid black;
+        }
+
+        .display {
+            width: 350px;
+            height: 100px;
+            background-color: rgb(218, 214, 214);
+            position: relative;
+            top: 15px;
+            left: 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 15px;
+            overflow: hidden;
+
+            text-align: right;
+            font-size: 36px;
+        }
+
+        .grid {
+            margin: 10px;
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            position: relative;
+            top: 25px;
+        }
+
+        button {
+            width: 80px;
+            height: 80px;
+            padding: 10px;
+            background: gray;
+            color: white;
+            font-size: medium;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+
+        }
+
+        button:hover {
+            background: gray;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .clear-row {
+            position: relative;
+            top: 25px;
+            left: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .clear-row button {
+            width: 180px;
+            height: 40px;
+        }
+
+        .left {
+            position: absolute;
+            left: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            margin: 10px;
+            gap: 5px;
+        }
+
+        .right {
+            margin: 10px;
+            position: absolute;
+            right: 0;
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 5px;
+        }
+
+        .right button {
+            height: 60px
+        }
+        .text{
+            position: relative;
+            top: 350px;
+            text-align: right;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="con">
+        <div class="display" id="display"></div>
+        <div class="clear-row">
+            <button id="clear">C</button>
+            <button id="backspace">⌫</button>
+        </div>
+        <div class="grid">
+            <div class="left">
+                <button data-num="1">1</button>
+                <button data-num="2">2</button>
+                <button data-num="3">3</button>
+                <button data-num="4">4</button>
+                <button data-num="5">5</button>
+                <button data-num="6">6</button>
+                <button data-num="7">7</button>
+                <button data-num="8">8</button>
+                <button data-num="9">9</button>
+                <button data-num="0">0</button>
+                <button data-num=".">.</button>
+
+
+            </div>
+            <div class="right">
+                <button data-op="+">+</button>
+                <button data-op="-">-</button>
+                <button data-op="*">*</button>
+                <button data-op="/">/</button>
+                <button id="equals">=</button>
+            </div>
+            <div class="text">Made by Binisha</div>
+        </div>
+    </div>
+
+    <script>
+        const displayEl = document.getElementById('display');
+        let input = '';
+
+        function render(){
+            displayEl.textContent = input || '0';
+        }
+
+        function press(value) {
+            input += value;
+            render();
+        }
+
+        function calculate() {
+            if (!input) return;
+            try {
+                if (!/^[0-9+\-*/.\s]+$/.test(input)) throw new Error('invalid');
+                const result = Function('"use strict"; return (' + input + ')')();
+                if (!isFinite(result)) throw new Error('math error');
+                input = String(Math.round(result * 1e10) / 1e10);
+            } catch (e) {
+                input = '';
+                displayEl.textContent = 'Error';
+                return;
+            }
+            render();
+        }
+
+        document.querySelectorAll('[data-num]').forEach(btn => {
+            btn.addEventListener('click', () => press(btn.dataset.num));
+        });
+        document.querySelectorAll('[data-op]').forEach(btn => {
+            btn.addEventListener('click', () => press(btn.dataset.op));
+        });
+        document.getElementById('equals').addEventListener('click', calculate);
+        document.getElementById('clear').addEventListener('click', () => { input = ''; render(); });
+        document.getElementById('backspace').addEventListener('click', () => { input = input.slice(0, -1); render(); });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') press(e.key);
+            else if (e.key === '.') press('.');
+            else if ('+-*/'.includes(e.key)) press(e.key);
+            else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+            else if (e.key === 'Backspace') document.getElementById('backspace').click();
+            else if (e.key === 'Escape') document.getElementById('clear').click();
+        });
+
+        render();
+
+    </script>
+</body>
+
+</html>
